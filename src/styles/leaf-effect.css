@@ -1,0 +1,214 @@
+/*
+  Nice Glass — hanging leaf effect
+  --------------------------------
+  Tune these CSS variables to adjust the effect without editing components.
+*/
+
+:root {
+  /* Physical leaf sway */
+  --leaf-sway-angle: 1.6deg;
+  --leaf-sway-duration: 8.5s;
+
+  /* Projection look */
+  --projection-blur: 15px;
+  --projection-opacity: 0.05;
+  --projection-color-opacity: 0.03;
+  --projection-height: 68vh;
+  --projection-top: 8vh;
+  --projection-left: 16vw;
+
+  /* Projection drift — a bit faster + more visible */
+  --projection-duration: 10.5s;
+  --projection-travel-x: 2.5vw;
+  --projection-travel-y: .5vh;
+  --projection-rotate: 4deg;
+  --projection-scale-mid: 1.04;
+}
+
+/* ---------- Physical hanging leaf ---------- */
+
+.nav__leaf-anchor {
+  position: relative;
+  width: 0;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.hanging-leaf {
+  position: absolute;
+  /* Pull up through header padding so the cord starts at the very top */
+  top: calc(-1 * 1.375rem);
+  left: 50%;
+  z-index: 40;
+  /* Desktop size */
+  width: 210px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  transform-origin: top center;
+  animation: leafSway var(--leaf-sway-duration) ease-in-out infinite;
+  will-change: transform;
+}
+
+.hanging-leaf__cord {
+  width: 1.5px;
+  /* Desktop cord length */
+  height: 250px;
+  background: #2b2924;
+  opacity: 0.92;
+  flex-shrink: 0;
+}
+
+.hanging-leaf__image {
+  display: block;
+  /* Desktop leaf size */
+  width: 210px;
+  height: 448px;
+  object-fit: contain;
+  /* Overlap the PNG's short built-in cord with the CSS cord */
+  margin-top: -0.35rem;
+  filter: drop-shadow(0 18px 14px rgba(60, 56, 40, 0.16));
+}
+
+@keyframes leafSway {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(calc(var(--leaf-sway-angle) * -1));
+  }
+  50% {
+    transform: translateX(-50%) rotate(var(--leaf-sway-angle));
+  }
+}
+
+/* ---------- Background projection ---------- */
+
+.leaf-projection {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.leaf-projection__inner {
+  position: absolute;
+  top: var(--projection-top);
+  left: var(--projection-left);
+  height: var(--projection-height);
+  width: auto;
+  aspect-ratio: 154 / 388;
+  animation: projectionDrift var(--projection-duration) ease-in-out infinite;
+  will-change: transform;
+}
+
+.leaf-projection__silhouette {
+  position: absolute;
+  inset: 0;
+  opacity: var(--projection-opacity);
+  filter: blur(var(--projection-blur));
+}
+
+.leaf-projection__silhouette svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.leaf-projection__color {
+  position: absolute;
+  inset: 0;
+  opacity: var(--projection-color-opacity);
+  filter: blur(calc(var(--projection-blur) + 6px));
+}
+
+.leaf-projection__color svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes projectionDrift {
+  0%,
+  100% {
+    transform: translate3d(
+        calc(var(--projection-travel-x) * -1),
+        var(--projection-travel-y),
+        0
+      )
+      rotate(calc(var(--projection-rotate) * -1))
+      scale(1);
+  }
+  50% {
+    transform: translate3d(
+        var(--projection-travel-x),
+        calc(var(--projection-travel-y) * -1),
+        0
+      )
+      rotate(var(--projection-rotate))
+      scale(var(--projection-scale-mid));
+  }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 900px) {
+  :root {
+    --projection-height: 55vh;
+    --projection-opacity: 0.18;
+    --projection-left: 0vw;
+    --projection-travel-x: 4vw;
+  }
+
+  .hanging-leaf {
+    width: 140px;
+  }
+
+  .hanging-leaf__cord {
+    height: 160px;
+  }
+
+  .hanging-leaf__image {
+    width: 140px;
+    height: 299px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --projection-height: 45vh;
+    --projection-opacity: 0.16;
+    --projection-blur: 18px;
+    --projection-top: 12vh;
+  }
+
+  .hanging-leaf {
+    width: 96px;
+  }
+
+  .hanging-leaf__cord {
+    height: 110px;
+  }
+
+  .hanging-leaf__image {
+    width: 96px;
+    height: 205px;
+  }
+}
+
+/* ---------- Accessibility ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .hanging-leaf,
+  .leaf-projection__inner {
+    animation: none;
+  }
+
+  .hanging-leaf {
+    transform: translateX(-50%) rotate(-0.4deg);
+  }
+
+  .leaf-projection__inner {
+    transform: translate3d(-2vw, 0.5vh, 0) rotate(-1.5deg);
+  }
+}
